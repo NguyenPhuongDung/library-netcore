@@ -15,3 +15,5 @@ example about dependency injection by C#
 ### migration database
 1. dotnet ef migrations add InitialModel -s Library.Api -p Library.Entities -o ./Migrations
 2. dotnet ef database update -s Library.Api -p Library.Entities 
+## Add angular into solution
+ng new Library-Angular --directory Library.Angular
