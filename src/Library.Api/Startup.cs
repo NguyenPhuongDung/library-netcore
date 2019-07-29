@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Library.Entities;
+﻿using Library.Entities;
+using Library.Interfaces;
+using Library.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.AspNetCore.Identity;
 
 namespace Library.Api
 {
@@ -29,6 +26,24 @@ namespace Library.Api
         {
             services.AddDbContext<LibraryContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:LibraryDb"]));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            //Add swagger to test api
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info
+                {
+                    Version = "v1",
+                    Title = "My API",
+                    Description = "My First ASP.NET Core Web API",
+                    TermsOfService = "None",
+                    Contact = new Contact() { Name = "Talking Dotnet", Email = "contact@talkingdotnet.com", Url = "www.talkingdotnet.com" }
+                });
+            });
+            //====================Add Identity =======================
+            services.AddIdentityCore<ApplicationUser>()
+                .AddEntityFrameworkStores<LibraryContext>()
+                .AddDefaultTokenProviders();
+            //DI
+            services.AddScoped(typeof(IUserService), typeof(UserService));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,6 +61,11 @@ namespace Library.Api
 
             app.UseHttpsRedirection();
             app.UseMvc();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
         }
     }
 }

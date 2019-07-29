@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Library.Entities;
 using Library.Interfaces;
@@ -14,13 +15,20 @@ namespace Library.Services
         }
         public async Task<bool> RegisterAsync(RegisterUserRequest model)
         {
-            var result = await UserManager.CreateAsync(new ApplicationUser
+            try
             {
-                Email = model.Email,
-                PhoneNumber = model.PhoneNumber,
-                UserName = model.UserName
-            }, model.Password);
-            return result.Succeeded;
+                var result = await UserManager.CreateAsync(new ApplicationUser
+                {
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                    UserName = model.UserName
+                }, model.Password);
+                return result.Succeeded;
+            }
+            catch( Exception ex)
+            {
+                return false;
+            }
         }
         
     }
