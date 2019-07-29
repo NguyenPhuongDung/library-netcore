@@ -10,9 +10,11 @@ namespace Library.Api.Controllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
-        public IActionResult Index()
+        // GET api/values
+        [HttpGet]
+        public ActionResult<IEnumerable<string>> Get()
         {
-            return View();
+            return new string[] { "value1", "value2" };
         }
     }
 }

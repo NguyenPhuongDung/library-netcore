@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Library.Interfaces\Library.Interfaces.csproj" />
     <ProjectReference Include="..\Library.Entities\Library.Entities.csproj" />
+    <ProjectReference Include="..\Library.Models\Library.Models.csproj" />
   </ItemGroup>
 
   <ItemGroup>
