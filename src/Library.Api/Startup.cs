@@ -9,11 +9,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.AspNetCore.Identity;
+using Library.Services.Auth;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Library.Api
 {
     public class Startup
     {
+        private const string SecretKey = "iNivDmHLpUA223sqsfhqGbMRdRj1PVkH"; // todo: get this from somewhere secure
+        private readonly SymmetricSecurityKey _signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SecretKey));
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -24,9 +31,10 @@ namespace Library.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //==================== Add database ====================
             services.AddDbContext<LibraryContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:LibraryDb"]));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            //Add swagger to test api
+            //==================== Add swagger to test api ====================
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info
@@ -42,8 +50,52 @@ namespace Library.Api
             services.AddIdentityCore<ApplicationUser>()
                 .AddEntityFrameworkStores<LibraryContext>()
                 .AddDefaultTokenProviders();
-            //DI
+            //==================== DI ====================
             services.AddScoped(typeof(IUserService), typeof(UserService));
+            services.AddSingleton<IJwtFactory, JwtFactory>();
+            // Get options from app settings
+            var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions));
+
+            // Configure JwtIssuerOptions
+            services.Configure<JwtIssuerOptions>(options =>
+            {
+            options.Issuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
+            options.Audience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)];
+            options.SigningCredentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
+            });
+
+            var tokenValidationParameters = new TokenValidationParameters
+                {
+                ValidateIssuer = true,
+                ValidIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)],
+
+                ValidateAudience = true,
+                ValidAudience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)],
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = _signingKey,
+
+                RequireExpirationTime = false,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+                };
+
+                services.AddAuthentication(options =>
+                {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                }).AddJwtBearer(configureOptions =>
+                {
+                    configureOptions.ClaimsIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
+                    configureOptions.TokenValidationParameters = tokenValidationParameters;
+                    configureOptions.SaveToken = true;
+                });
+
+                // api user claim policy
+                services.AddAuthorization(options =>
+                {
+                options.AddPolicy("ApiUser", policy => policy.RequireClaim(Constants.Strings.JwtClaimIdentifiers.Rol, Constants.Strings.JwtClaims.ApiAccess));
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -61,6 +113,7 @@ namespace Library.Api
 
             app.UseHttpsRedirection();
             app.UseMvc();
+            //==================== Add swagger to test api ====================
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Library.Interfaces;
 using Library.Models.Request.User;
+using Library.Utilities.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Api.Controllers
@@ -12,7 +12,7 @@ namespace Library.Api.Controllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
-        protected IUserService _userService { get; set; }
+        protected readonly IUserService _userService;
 
         public AccountsController(IUserService userService)
         {
@@ -44,5 +44,20 @@ namespace Library.Api.Controllers
                 return BadRequest();
             }
         }
+        // POST api/auth/login
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody]LoginRequest credentials)
+        {
+            var result = await _userService.LoginAsync(credentials);
+            if(result.LoginStatus == (int)LoginStatus.Success)
+            {
+                return new OkObjectResult(result);
+            }
+            else 
+            {
+                return BadRequest();
+            }
+        }
+
     }
 }

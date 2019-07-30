@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+  <ProjectReference Include="..\Library.Utilities\Library.Utilities.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="8.4.0" />
   </ItemGroup>
 

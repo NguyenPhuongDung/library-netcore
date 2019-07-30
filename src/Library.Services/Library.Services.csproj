@@ -4,6 +4,12 @@
     <ProjectReference Include="..\Library.Interfaces\Library.Interfaces.csproj" />
     <ProjectReference Include="..\Library.Entities\Library.Entities.csproj" />
     <ProjectReference Include="..\Library.Models\Library.Models.csproj" />
+    <ProjectReference Include="..\Library.Utilities\Library.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.5.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.5.0" />
   </ItemGroup>
   
   <PropertyGroup>
