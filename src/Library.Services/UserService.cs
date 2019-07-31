@@ -6,10 +6,11 @@ using Library.Interfaces;
 using Library.Models.Request.User;
 using Library.Models.Response;
 using Library.Services.Auth;
-using Library.Utilities.Constants;
+using Library.Utilities.Dictionaries;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using AutoMapper;
 
 namespace Library.Services
 {
@@ -17,11 +18,13 @@ namespace Library.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IJwtFactory _jwtFactory;
-        private readonly JwtIssuerOptions _jwtOptions;
-        public UserService(UserManager<ApplicationUser> userManager, IJwtFactory jwtFactory, IOptions<JwtIssuerOptions> jwtOptions){
+        private readonly JwtIssuerOptions _jwtOptions;    
+        private readonly IMapper Mapper;
+        public UserService(UserManager<ApplicationUser> userManager, IJwtFactory jwtFactory, IOptions<JwtIssuerOptions> jwtOptions, IMapper mapper){
             _userManager = userManager;
             _jwtFactory  = jwtFactory;
             _jwtOptions  = jwtOptions.Value;
+            Mapper = mapper;
         }
 
         public async Task<LoginResponse> LoginAsync(LoginRequest user)
@@ -61,22 +64,11 @@ namespace Library.Services
             // Credentials are invalid, or account doesn't exist
             return await Task.FromResult<ClaimsIdentity>(null);
         }
-        public async Task<bool> RegisterAsync(RegisterUserRequest model)
+        public async Task<bool> RegisterAsync(RegisterUserRequest registerUser)
         {
-            try
-            {
-                var result = await _userManager.CreateAsync(new ApplicationUser
-                {
-                    Email = model.Email,
-                    PhoneNumber = model.PhoneNumber,
-                    UserName = model.UserName
-                }, model.Password);
-                return result.Succeeded;
-            }
-            catch( Exception ex)
-            {
-                return false;
-            }
+            var accountRegister = Mapper.Map<ApplicationUser>(registerUser);
+            var result = await _userManager.CreateAsync(accountRegister, registerUser.Password);
+            return result.Succeeded;
         }
         
     }

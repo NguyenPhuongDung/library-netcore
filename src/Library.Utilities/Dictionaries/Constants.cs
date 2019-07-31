@@ -1,4 +1,4 @@
-namespace Library.Services.Auth
+namespace Library.Utilities.Dictionaries
 {
     public class Constants
     {

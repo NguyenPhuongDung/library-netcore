@@ -1,6 +1,7 @@
 ﻿using Library.Entities;
 using Library.Interfaces;
 using Library.Services;
+using Library.Utilities.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,14 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using FluentValidation.AspNetCore;
+using Library.Models.Request.User;
+using System.Net;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Library.Utilities.Dictionaries;
+using AutoMapper;
+using Library.Models.Mappings;
 
 namespace Library.Api
 {
@@ -33,7 +42,16 @@ namespace Library.Api
         {
             //==================== Add database ====================
             services.AddDbContext<LibraryContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:LibraryDb"]));
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<RegisterUserRequestValidator>());
+            //services.AddTransient<IValidator<RegisterUserRequest>, RegisterUserRequestValidator>();
+            //
+            // Auto Mapper Configurations
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            services.AddSingleton(mappingConfig.CreateMapper());
             //==================== Add swagger to test api ====================
             services.AddSwaggerGen(c =>
             {
@@ -59,13 +77,13 @@ namespace Library.Api
             // Configure JwtIssuerOptions
             services.Configure<JwtIssuerOptions>(options =>
             {
-            options.Issuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
-            options.Audience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)];
-            options.SigningCredentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
+                options.Issuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
+                options.Audience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)];
+                options.SigningCredentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
             });
 
             var tokenValidationParameters = new TokenValidationParameters
-                {
+            {
                 ValidateIssuer = true,
                 ValidIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)],
 
@@ -78,24 +96,24 @@ namespace Library.Api
                 RequireExpirationTime = false,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
-                };
+            };
 
-                services.AddAuthentication(options =>
-                {
+            services.AddAuthentication(options =>
+            {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                }).AddJwtBearer(configureOptions =>
-                {
-                    configureOptions.ClaimsIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
-                    configureOptions.TokenValidationParameters = tokenValidationParameters;
-                    configureOptions.SaveToken = true;
-                });
-
-                // api user claim policy
-                services.AddAuthorization(options =>
-                {
+            }).AddJwtBearer(configureOptions =>
+            {
+                configureOptions.ClaimsIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
+                configureOptions.TokenValidationParameters = tokenValidationParameters;
+                configureOptions.SaveToken = true;
+            });
+            
+            // api user claim policy
+            services.AddAuthorization(options =>
+            {
                 options.AddPolicy("ApiUser", policy => policy.RequireClaim(Constants.Strings.JwtClaimIdentifiers.Rol, Constants.Strings.JwtClaims.ApiAccess));
-                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -110,9 +128,28 @@ namespace Library.Api
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseExceptionHandler(
+                      builder =>
+                      {
+                          builder.Run(
+                        async context =>
+                        {
+                            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                            context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
 
+                            var error = context.Features.Get<IExceptionHandlerFeature>();
+                            if (error != null)
+                            {
+                                context.Response.AddApplicationError(error.Error.Message);
+                                await context.Response.WriteAsync(error.Error.Message).ConfigureAwait(false);
+                            }
+                        });
+                      });
             app.UseHttpsRedirection();
             app.UseMvc();
+            //==================== Automap ====================
+
+
             //==================== Add swagger to test api ====================
             app.UseSwagger();
             app.UseSwaggerUI(c =>

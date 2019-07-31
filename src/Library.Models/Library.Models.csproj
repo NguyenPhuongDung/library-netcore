@@ -5,10 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-  <ProjectReference Include="..\Library.Utilities\Library.Utilities.csproj" />
+    <ProjectReference Include="..\Library.Utilities\Library.Utilities.csproj" />
+    <ProjectReference Include="..\Library.Entities\Library.Entities.csproj" />
   </ItemGroup>
   
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="8.1.1" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="8.4.0" />
   </ItemGroup>
 

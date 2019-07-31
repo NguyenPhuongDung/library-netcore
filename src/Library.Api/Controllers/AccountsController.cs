@@ -1,20 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoMapper;
+using Library.Entities;
 using Library.Interfaces;
 using Library.Models.Request.User;
-using Library.Utilities.Constants;
+using Library.Utilities.Dictionaries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountsController : ControllerBase
+    public class AccountsController : ApiBaseController
     {
         protected readonly IUserService _userService;
-
-        public AccountsController(IUserService userService)
+        public AccountsController(IUserService userService, IMapper mapper) : base(mapper)
         {
             _userService = userService;
         }
@@ -27,22 +28,13 @@ namespace Library.Api.Controllers
         [HttpPost]
         public async Task<ActionResult> Register([FromBody] RegisterUserRequest registerUser)
         {
-            if (ModelState.IsValid)
+            var accountRegister = Mapper.Map<ApplicationUser>(registerUser);
+            var result = await _userService.RegisterAsync(registerUser);
+            if(!result)
             {
-                try
-                {
-                    var x = await _userService.RegisterAsync(registerUser);
-                    return Ok();
-                }
-                catch (Exception)
-                {
-                    return BadRequest();
-                }
+                return new BadRequestObjectResult("Something wrong!");
             }
-            else
-            {
-                return BadRequest();
-            }
+            return new OkObjectResult("Account created");
         }
         // POST api/auth/login
         [HttpPost("login")]

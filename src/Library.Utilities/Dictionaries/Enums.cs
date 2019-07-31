@@ -1,4 +1,4 @@
-namespace Library.Utilities.Constants
+namespace Library.Utilities.Dictionaries
 {
     public enum LoginStatus
     {
