@@ -10,6 +10,7 @@ namespace Library.Models.Mappings
         public MappingProfile()
         {
             CreateMap<ApplicationUser, RegisterUserRequest>().ReverseMap();
+            CreateMap<Post, PostRequest>().ReverseMap();
         }
     }
 }

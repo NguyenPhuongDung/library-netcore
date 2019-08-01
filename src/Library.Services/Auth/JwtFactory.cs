@@ -37,8 +37,8 @@ namespace Library.Services.Auth
             new Claim(JwtRegisteredClaimNames.Sub, userName),
             new Claim(JwtRegisteredClaimNames.Jti, await _jwtOptions.JtiGenerator()),
             new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(_jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64),
-                        identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Rol),
-                        identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Id)
+                        // identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Rol),
+                        // identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Id)
         };
 
             // Create the JWT security token and encode it.

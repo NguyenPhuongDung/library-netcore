@@ -1,29 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+using AutoMapper;
 using Library.Entities;
 using Library.Interfaces;
+using Library.Models.Request.User;
 
 namespace Library.Services
 {
     public class PostService : IPostService
     {
         private readonly IUnitOfWork _unitOfWork;
-
-        public PostService(IUnitOfWork unitOfWork)
+        private readonly IMapper Mapper;
+        public PostService(IUnitOfWork unitOfWork , IMapper mapper)
         {
             this._unitOfWork = unitOfWork;
+            Mapper = mapper;
         }
-        public void Add(Post Post)
+        public void Add(PostRequest postRequest)
         {
-            _unitOfWork.PostRepository.Add(Post);
+            var post = Mapper.Map<Post>(postRequest);
+            _unitOfWork.PostRepository.Add(post);
             _unitOfWork.Save();
 
         }
-        public void Update(Post Post)
+        public void Update(PostRequest postRequest)
         {
-            _unitOfWork.PostRepository.Edit(Post);
+            var post = Mapper.Map<Post>(postRequest);
+            _unitOfWork.PostRepository.Edit(post);
             _unitOfWork.Save();
 
         }

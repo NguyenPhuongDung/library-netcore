@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using Library.Entities;
 using Library.Interfaces;
-
+using Library.Models.Request.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -71,7 +71,7 @@ namespace Library.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddCategory([FromBody]Post model)
+        public IActionResult AddCategory([FromBody]PostRequest model)
         {
             if (ModelState.IsValid)
             {
@@ -90,7 +90,7 @@ namespace Library.Api.Controllers
             return Ok();
         }
         [HttpPut]
-        public IActionResult UpdatePost([FromBody]Post model)
+        public IActionResult UpdatePost([FromBody]PostRequest model)
         {
             if (ModelState.IsValid)
             {

@@ -23,6 +23,8 @@ using Microsoft.AspNetCore.Http;
 using Library.Utilities.Dictionaries;
 using AutoMapper;
 using Library.Models.Mappings;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Library.Api
 {
@@ -55,14 +57,18 @@ namespace Library.Api
             //==================== Add swagger to test api ====================
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info
-                {
-                    Version = "v1",
-                    Title = "My API",
-                    Description = "My First ASP.NET Core Web API",
-                    TermsOfService = "None",
-                    Contact = new Contact() { Name = "Talking Dotnet", Email = "contact@talkingdotnet.com", Url = "www.talkingdotnet.com" }
-                });
+                c.SwaggerDoc("v1", new Info { Title = "You api title", Version = "v1" });
+                c.AddSecurityDefinition("Bearer",
+                    new ApiKeyScheme
+                    {
+                        In = "header",
+                        Description = "Please enter into field the word 'Bearer' following by space and JWT",
+                        Name = "Authorization",
+                        Type = "apiKey"
+                    });
+                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>> {
+                { "Bearer", Enumerable.Empty<string>() },
+            });
             });
             //====================Add Identity =======================
             services.AddIdentityCore<ApplicationUser>()
@@ -86,13 +92,13 @@ namespace Library.Api
 
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = true,
+                ValidateIssuer = false,
                 ValidIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)],
 
-                ValidateAudience = true,
+                ValidateAudience = false,
                 ValidAudience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)],
 
-                ValidateIssuerSigningKey = true,
+                ValidateIssuerSigningKey = false,
                 IssuerSigningKey = _signingKey,
 
                 RequireExpirationTime = false,
@@ -110,7 +116,7 @@ namespace Library.Api
                 configureOptions.TokenValidationParameters = tokenValidationParameters;
                 configureOptions.SaveToken = true;
             });
-            
+
             // api user claim policy
             services.AddAuthorization(options =>
             {
