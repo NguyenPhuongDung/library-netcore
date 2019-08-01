@@ -69,7 +69,9 @@ namespace Library.Api
                 .AddEntityFrameworkStores<LibraryContext>()
                 .AddDefaultTokenProviders();
             //==================== DI ====================
+            services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
             services.AddScoped(typeof(IUserService), typeof(UserService));
+            services.AddScoped(typeof(IPostService), typeof(PostService));
             services.AddSingleton<IJwtFactory, JwtFactory>();
             // Get options from app settings
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions));

@@ -2,24 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
+using Library.Entities;
+
 namespace Library.Interfaces
 {
-    public interface IRepositoryBase<TEntity> where TEntity: class
+
+    public interface IGenericRepository<TEntity> where TEntity : BaseEntity
     {
-        TEntity Get(int id);
+        List<TEntity> GetAll();
+        List<TEntity> FindBy(Expression<Func<TEntity, bool>> predicate);
+        bool Add(TEntity entity);
+        bool Delete(TEntity entity);
+        bool Edit(TEntity entity);
+        bool Save();
+        bool SaveChanges(TEntity entity);
+        TEntity FindById(int id);
 
-        IEnumerable<TEntity> GetAll();
-
-        IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
-
-        TEntity SingleOrDefault(Expression<Func<TEntity, bool>> predicate);
-
-        void Add(TEntity entity);
-
-        void AddRange(IEnumerable<TEntity> entities);
-
-        void Remove(TEntity entity);
-
-        void RemoveRange(IEnumerable<TEntity> entities);
     }
 }

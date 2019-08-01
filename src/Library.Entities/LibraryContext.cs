@@ -5,6 +5,10 @@ namespace Library.Entities
 {
     public class LibraryContext: IdentityDbContext<ApplicationUser>
     {
-        public LibraryContext(DbContextOptions<LibraryContext> options): base (options){}
+        public LibraryContext(DbContextOptions<LibraryContext> options) : base(options)
+        {
+            
+        }
+        public virtual DbSet<Post> Post { get; set; }
     }
 }

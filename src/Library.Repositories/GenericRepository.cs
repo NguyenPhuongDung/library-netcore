@@ -8,64 +8,73 @@ using System.Linq;
 
 namespace Library.Repositories
 {
-    public abstract class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : class
+    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
     {
-        readonly DbSet<TEntity> _entities;
-        protected LibraryContext RepositoryContext { get; set; }
+        private LibraryContext _context;
+        private DbSet<TEntity> entities;
 
-        public RepositoryBase(LibraryContext repositoryContext)
+        public GenericRepository(LibraryContext context)
         {
-            RepositoryContext = repositoryContext;
-            _entities = RepositoryContext.Set<TEntity>();
-        }
-
-        public TEntity Get(int id)
-        {
-            var entity = _entities.Find(id);
-            RepositoryContext.Entry(entity).State = EntityState.Detached;
-            return entity;
-        }
-        public bool IsExits(int id)
-        {
-            return _entities.Find(id) != null;
-        }
-        public IEnumerable<TEntity> GetAll()
-        {
-            return _entities.ToList();
+            this._context = context;
+            entities = context.Set<TEntity>();
         }
 
-        public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
+        public virtual List<TEntity> GetAll()
         {
-            return _entities.Where(predicate);
+
+            IQueryable<TEntity> query = entities;
+            return query.ToList();
         }
 
-        public TEntity SingleOrDefault(Expression<Func<TEntity, bool>> predicate)
+        public List<TEntity> FindBy(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate)
         {
-            return _entities.SingleOrDefault(predicate);
+
+            IQueryable<TEntity> query = entities.Where(predicate);
+            return query.ToList();
+        }
+        public virtual void Attach(TEntity entity)
+        {
+            entities.Attach(entity);
         }
 
-        public void Add(TEntity entity)
+        public virtual bool Add(TEntity entity)
         {
-            _entities.Add(entity);
+            entities.Add(entity);
+            return true;
         }
 
-        public void AddRange(IEnumerable<TEntity> entities)
+        public virtual bool Delete(TEntity entity)
         {
-            _entities.AddRange(entities);
+            entities.Remove(entity);
+            return true;
         }
 
-        public void Remove(TEntity entity)
+        public virtual bool Edit(TEntity entity)
         {
-            _entities.Remove(entity);
+            _context.Entry(entity).State = EntityState.Modified;
+            return true;
         }
 
-        public void RemoveRange(IEnumerable<TEntity> entities)
+        public virtual bool Save()
         {
-            _entities.RemoveRange(entities);
+            _context.SaveChanges();
+            return true;
         }
-        public void CreateAll(List<TEntity> entity)
+
+        public virtual bool SaveChanges(TEntity entity)
         {
-            this.RepositoryContext.Set<TEntity>().AddRange(entity);
+            if (_context.Entry(entity).State == EntityState.Detached)
+            {
+                entities.Attach(entity);
+            }
+            _context.Entry(entity).State = EntityState.Modified;
+            _context.SaveChanges();
+            return true;
+        }
+        public virtual TEntity FindById(int id)
+        {
+            return entities.Find(id);
         }
     }
+
 }
