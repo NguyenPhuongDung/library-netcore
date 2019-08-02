@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using Library.Models.Response;
 using Library.Utilities.Dictionaries;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -19,27 +20,27 @@ namespace Library.Services.Auth
             _jwtOptions = jwtOptions.Value;
             ThrowIfInvalidOptions(_jwtOptions);
         }
-        public async Task<string> GenerateJwt(ClaimsIdentity identity, IJwtFactory jwtFactory, string userName, JwtIssuerOptions jwtOptions, JsonSerializerSettings serializerSettings)
+        public async Task<LoginResponse> GenerateJwt(ClaimsIdentity identity, IJwtFactory jwtFactory, string userName, JwtIssuerOptions jwtOptions)
         {
-            var response = new
+            var response = new LoginResponse
             {
-                id = identity.Claims.Single(c => c.Type == "id").Value,
-                auth_token = await jwtFactory.GenerateEncodedToken(userName, identity),
-                expires_in = (int)jwtOptions.ValidFor.TotalSeconds
+                Id = identity.Claims.Single(c => c.Type == "id").Value,
+                Auth_Token = await jwtFactory.GenerateEncodedToken(userName, identity),
+                Expires = (int)jwtOptions.ValidFor.TotalSeconds
             };
 
-            return JsonConvert.SerializeObject(response, serializerSettings);
+            return response;
         }
         public async Task<string> GenerateEncodedToken(string userName, ClaimsIdentity identity)
         {
             var claims = new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, userName),
+            // new Claim(JwtRegisteredClaimNames.Sub, userName),
             new Claim(JwtRegisteredClaimNames.Jti, await _jwtOptions.JtiGenerator()),
             new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(_jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64),
-                        // identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Rol),
-                        // identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Id)
-        };
+            identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Rol),
+            identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Id)
+            };
 
             // Create the JWT security token and encode it.
             var jwt = new JwtSecurityToken(

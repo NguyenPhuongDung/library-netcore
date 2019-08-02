@@ -37,11 +37,9 @@ namespace Library.Services
                 };
             }
 
-            var jwt = await _jwtFactory.GenerateJwt(identity, _jwtFactory, user.Username, _jwtOptions, new JsonSerializerSettings { Formatting = Formatting.Indented });
-            return new LoginResponse{
-                LoginStatus = (int)LoginStatus.Success,
-                Token = jwt
-            };
+            var jwt = await _jwtFactory.GenerateJwt(identity, _jwtFactory, user.Username, _jwtOptions);
+            jwt.LoginStatus = (int)LoginStatus.Success;
+            return jwt;
         }
         
         private async Task<ClaimsIdentity> GetClaimsIdentity(string userName, string password)

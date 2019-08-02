@@ -120,7 +120,7 @@ namespace Library.Api
             // api user claim policy
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("ApiUser", policy => policy.RequireClaim(Constants.Strings.JwtClaimIdentifiers.Rol, Constants.Strings.JwtClaims.ApiAccess));
+                options.AddPolicy("ApiUser", policy => policy.RequireClaim("rol"));
             });
         }
 
@@ -154,7 +154,9 @@ namespace Library.Api
                         });
                       });
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseMvc();
+            
             //==================== Automap ====================
 
 

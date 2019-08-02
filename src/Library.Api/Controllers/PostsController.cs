@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Library.Entities;
 using Library.Interfaces;
 using Library.Models.Request.User;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ namespace Library.Api.Controllers
             _postService = postService;
         }
         [HttpGet]
-        [Authorize]
+        [Authorize (Policy = "ApiUser")]
         public IActionResult GetAll()
         {
             try

@@ -43,7 +43,7 @@ namespace Library.Api.Controllers
             var result = await _userService.LoginAsync(credentials);
             if(result.LoginStatus == (int)LoginStatus.Success)
             {
-                return new OkObjectResult(result);
+                return new JsonResult(result);
             }
             else 
             {
