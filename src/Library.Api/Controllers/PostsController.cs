@@ -24,10 +24,12 @@ namespace Library.Api.Controllers
         }
         [HttpGet]
         [Authorize (Policy = "ApiUser")]
+        //[Authorize(Roles = "Admin")]
         public IActionResult GetAll()
         {
             try
             {
+                var userId =  HttpContext.User.Identity.Name;
                 var categories = _postService.GetAllPosts();
                 if (categories == null)
                 {

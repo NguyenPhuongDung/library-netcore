@@ -44,7 +44,15 @@ namespace Library.Api.Controllers
         // {
         //     return new Response<T>(errorCode, message, result);
         // }
-
+        protected static ResponseResult<T> Handle<T>(int errorCode, string message, T result)
+        {
+            return new ResponseResult<T>
+            {
+                ErrorCode = errorCode,
+                ErrorMessage = message,
+                Result = result
+            };
+        }
         protected ObjectResult Unauthorized(object obj)
         {
             return StatusCode((int)HttpStatusCode.Unauthorized, obj);
@@ -54,5 +62,13 @@ namespace Library.Api.Controllers
         {
             return StatusCode((int)HttpStatusCode.Forbidden, obj);
         }
+    }
+
+    public class ResponseResult<T>
+    {
+        public int ErrorCode { get; set; }
+
+        public string ErrorMessage { get; set; }
+        public T Result { get; set; }
     }
 }

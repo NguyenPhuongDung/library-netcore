@@ -35,12 +35,17 @@ namespace Library.Services.Auth
         {
             var claims = new[]
             {
-            // new Claim(JwtRegisteredClaimNames.Sub, userName),
+            new Claim(JwtRegisteredClaimNames.Sub, userName),
             new Claim(JwtRegisteredClaimNames.Jti, await _jwtOptions.JtiGenerator()),
             new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(_jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64),
+            new Claim("role", identity.RoleClaimType),
             identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Rol),
             identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Id)
+
             };
+            //var roles = await _userManager.GetRolesAsync(user);
+
+            //claims.AddRange(roles.Select(role => new Claim(ClaimsIdentity.DefaultRoleClaimType, role)));
 
             // Create the JWT security token and encode it.
             var jwt = new JwtSecurityToken(

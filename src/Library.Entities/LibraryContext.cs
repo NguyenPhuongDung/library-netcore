@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Library.Entities
 {
-    public class LibraryContext: IdentityDbContext<ApplicationUser>
+    public class LibraryContext: IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
         public LibraryContext(DbContextOptions<LibraryContext> options) : base(options)
         {

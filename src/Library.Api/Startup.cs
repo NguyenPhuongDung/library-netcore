@@ -25,6 +25,7 @@ using AutoMapper;
 using Library.Models.Mappings;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Library.Api
 {
@@ -71,9 +72,10 @@ namespace Library.Api
             });
             });
             //====================Add Identity =======================
-            services.AddIdentityCore<ApplicationUser>()
-                .AddEntityFrameworkStores<LibraryContext>()
-                .AddDefaultTokenProviders();
+            services.AddIdentity<ApplicationUser, ApplicationRole>()
+                .AddRoleManager<RoleManager<ApplicationRole>>()
+                .AddDefaultTokenProviders()
+                .AddEntityFrameworkStores<LibraryContext>();
             //==================== DI ====================
             services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
             services.AddScoped(typeof(IUserService), typeof(UserService));
@@ -120,12 +122,12 @@ namespace Library.Api
             // api user claim policy
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("ApiUser", policy => policy.RequireClaim("rol"));
+                options.AddPolicy("ApiUser", policy => policy.RequireRole("Admin"));
             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env , IServiceProvider services)
         {
             if (env.IsDevelopment())
             {
@@ -156,7 +158,7 @@ namespace Library.Api
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseMvc();
-            
+            //CreateUserRoles(services).Wait();
             //==================== Automap ====================
 
 
@@ -167,5 +169,38 @@ namespace Library.Api
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
         }
+
+        private async Task CreateUserRoles(IServiceProvider serviceProvider)
+		{
+			var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+			var UserManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+
+			IdentityResult roleResult;
+			//Adding Addmin Role  
+			var roleCheck = await RoleManager.RoleExistsAsync("Admin");
+			if (!roleCheck)
+			{
+				//create the roles and seed them to the database  
+				roleResult = await RoleManager.CreateAsync(new IdentityRole("Admin"));
+			}
+
+			// roleCheck = await RoleManager.RoleExistsAsync("Manager");
+			// if (!roleCheck)
+			// {
+			// 	//create the roles and seed them to the database  
+			// 	roleResult = await RoleManager.CreateAsync(new IdentityRole("Manager"));
+			// }
+
+			//Assign Admin role to the main User here we have given our newly loregistered login id for Admin management  
+			ApplicationUser user = await UserManager.FindByEmailAsync("admin@yopmail.com");
+			var User = new ApplicationUser();
+			await UserManager.AddToRoleAsync(user, "Admin");
+
+
+			// user = await UserManager.FindByEmailAsync("Afraz@gmail.com");
+			// await UserManager.AddToRoleAsync(user, "Manager");
+
+		}
     }
 }
