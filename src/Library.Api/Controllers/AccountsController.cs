@@ -7,6 +7,7 @@ using Library.Interfaces;
 using Library.Models.Request.User;
 using Library.Utilities.Dictionaries;
 using Microsoft.AspNetCore.Mvc;
+using static Library.Utilities.Dictionaries.Enums;
 
 namespace Library.Api.Controllers
 {
@@ -19,12 +20,7 @@ namespace Library.Api.Controllers
         {
             _userService = userService;
         }
-        // GET api/values
-        [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+
         [HttpPost]
         public async Task<ActionResult> Register([FromBody] RegisterUserRequest registerUser)
         {

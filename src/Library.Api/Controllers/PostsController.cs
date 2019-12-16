@@ -23,8 +23,8 @@ namespace Library.Api.Controllers
             _postService = postService;
         }
         [HttpGet]
-        [Authorize (Policy = "ApiUser")]
-        //[Authorize(Roles = "Admin")]
+        //[Authorize (Policy = "ApiUser")]
+        [Authorize(Roles = "Admin")]
         public IActionResult GetAll()
         {
             try

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using Library.Entities;
 using Library.Models.Response;
 using Library.Utilities.Dictionaries;
 using Microsoft.Extensions.Options;
@@ -38,8 +39,8 @@ namespace Library.Services.Auth
             new Claim(JwtRegisteredClaimNames.Sub, userName),
             new Claim(JwtRegisteredClaimNames.Jti, await _jwtOptions.JtiGenerator()),
             new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(_jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64),
-            new Claim("role", identity.RoleClaimType),
-            identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Rol),
+            new Claim("role", "Admin"),
+            //identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Rol),
             identity.FindFirst(Constants.Strings.JwtClaimIdentifiers.Id)
 
             };
@@ -60,12 +61,12 @@ namespace Library.Services.Auth
 
             return encodedJwt;
         }
-        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id)
+        public ClaimsIdentity GenerateClaimsIdentity(ApplicationUser user)
         {
-            return new ClaimsIdentity(new GenericIdentity(userName, "Token"), new[]
+            return new ClaimsIdentity(new GenericIdentity(user.UserName, "Token"), new[]
             {
-                new Claim(Constants.Strings.JwtClaimIdentifiers.Id, id),
-                new Claim(Constants.Strings.JwtClaimIdentifiers.Rol, Constants.Strings.JwtClaims.ApiAccess)
+                new Claim(Constants.Strings.JwtClaimIdentifiers.Id, user.Id),
+                new Claim(Constants.Strings.JwtClaimIdentifiers.Rol, "Admin")
             });
         }
         /// <returns>Date converted to seconds since Unix epoch (Jan 1, 1970, midnight UTC).</returns>

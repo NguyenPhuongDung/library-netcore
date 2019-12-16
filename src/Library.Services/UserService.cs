@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using AutoMapper;
+using static Library.Utilities.Dictionaries.Enums;
 
 namespace Library.Services
 {
@@ -53,10 +54,10 @@ namespace Library.Services
             if (userToVerify == null) return await Task.FromResult<ClaimsIdentity>(null);
 
             // check the credentials
-            var m = await _userManager.CheckPasswordAsync(userToVerify, password);
-            if (await _userManager.CheckPasswordAsync(userToVerify, password))
+            var checkPassword = await _userManager.CheckPasswordAsync(userToVerify, password);
+            if (checkPassword)
             {
-                return await Task.FromResult(_jwtFactory.GenerateClaimsIdentity(userName, userToVerify.Id));
+                return await Task.FromResult(_jwtFactory.GenerateClaimsIdentity(userToVerify));
             }
 
             // Credentials are invalid, or account doesn't exist

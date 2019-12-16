@@ -11,7 +11,7 @@ namespace Library.Utilities.Dictionaries
 
             public static class JwtClaims
             {
-                public const string ApiAccess = "api_access";
+                public const string ApiAccess = "Admin";
             }
         }
     }
