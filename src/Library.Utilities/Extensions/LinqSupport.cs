@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 
 using Library.Utilities.Dictionaries;
@@ -31,6 +32,13 @@ namespace Library.Utilities.Extensions
                 Totals = source.Count(),
             };
         }
+
+        //public static IEnumerable<TEntity> GetEmployees<TEntity>(this IQueryable<TEntity> source, Expression<Func<TEntity, bool>> predicate, int number)
+        //{
+        //    return source.Where(predicate)
+        //        .OrderBy(s => s.EmpSal)
+        //        .Take(number);
+        //}
 
         public static TResult[] ConvertArray<TSource, TResult>(this IEnumerable<TSource> items, Func<TSource, TResult> toResult)
         {
